@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>週次支出レポート — 4/20（月）〜 4/26（日）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f6f9;
+      --card:      #ffffff;
+      --border:    #e8ecf0;
+      --text-main: #1a2332;
+      --text-sub:  #5a6a7a;
+      --text-mute: #9aabb8;
+      --accent:    #2563eb;
+      --over:      #d97706;
+      --under:     #059669;
+      --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Noto Sans JP', 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 28px 20px 0;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-mute);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .page-period {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 16px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .card-icon {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: #f0f4f8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-mute);
+      font-weight: 500;
+    }
+    .card-body { padding: 16px 18px; }
+
+    /* ── SUMMARY (TOP) ── */
+    .summary-kpi {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .kpi-cell {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+    }
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-mute);
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+    }
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-mute);
+      margin-top: 4px;
+    }
+    .summary-diff {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+    }
+    .diff-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+    .diff-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .diff-value.over  { color: var(--over); }
+    .diff-value.under { color: var(--under); }
+    .diff-pct {
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 5px;
+      opacity: 0.8;
+    }
+
+    /* ── ITEMS ── */
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f4f6f9;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-emoji { font-size: 17px; width: 26px; text-align: center; flex-shrink: 0; }
+    .item-info  { flex: 1; min-width: 0; }
+    .item-name  {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-bar-wrap {
+      width: 72px;
+      height: 3px;
+      background: #edf0f4;
+      border-radius: 2px;
+      margin-top: 5px;
+    }
+    .item-bar { height: 3px; border-radius: 2px; background: #93c5fd; }
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+    .item-amount {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .tag-bad   { background: #fff3cd; color: #92400e; }
+    .tag-inv   { background: #ede9fe; color: #5b21b6; }
+    .tag-fixed { background: #e0f2fe; color: #0369a1; }
+    .no-items { font-size: 13px; color: var(--text-mute); padding: 8px 0; text-align: center; }
+
+    /* ── CHART ── */
+    .chart-wrap { width: 100%; }
+    .trend-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .trend-direction {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .trend-legend {
+      display: flex;
+      gap: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-mute);
+    }
+
+    /* ── AI COMMENTS ── */
+    .ai-block {
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+    }
+    .ai-block:last-child { margin-bottom: 0; }
+    .ai-block.ai-bad  { background: #fffbeb; border-color: #fde68a; }
+    .ai-block.ai-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .ai-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .ai-content { flex: 1; }
+    .ai-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+      color: var(--text-sub);
+    }
+    .ai-block.ai-bad  .ai-label { color: #92400e; }
+    .ai-block.ai-good .ai-label { color: #15803d; }
+    .ai-text {
+      font-size: 13px;
+      line-height: 1.75;
+      color: #334155;
+    }
+
+    /* ── YEARLY NOTE ── */
+    .yearly-note {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-align: right;
+      margin-top: 6px;
+      padding: 0 2px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 0 0 32px;
+      font-size: 12px;
+      color: var(--text-mute);
+    }
+
+    /* ── DARK MODE ── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0f1117;
+        --card:      #1a1f2e;
+        --border:    #2a3040;
+        --text-main: #e8edf5;
+        --text-sub:  #8a9ab8;
+        --text-mute: #5a6a7a;
+        --accent:    #60a5fa;
+        --over:      #fb923c;
+        --under:     #34d399;
+        --shadow:    0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+      }
+      .kpi-cell       { background: #1e2535; }
+      .summary-diff   { background: #1e2535; }
+      .item-bar-wrap  { background: #2a3040; }
+      .item-bar       { background: #3b82f6; }
+      .ai-block       { background: #1e2535; }
+      .ai-block.ai-bad  { background: #2a1a0a; border-color: #92400e; }
+      .ai-block.ai-good { background: #0a2a1a; border-color: #15803d; }
+      .tag-bad   { background: #3a2a00; color: #fbbf24; }
+      .tag-inv   { background: #2a1a40; color: #a78bfa; }
+      .tag-fixed { background: #0a2030; color: #38bdf8; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">週次支出レポート</div>
+  <div class="page-period">4/20（月）〜 4/26（日）</div>
+</div>
+
+<div class="main">
+
+  <!-- Card 1: 週次サマリー（最上部） -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">📊</div>
+        今週のサマリー
+      </div>
+      <span class="card-meta">vs 8週平均</span>
+    </div>
+    <div class="card-body">
+      <div class="summary-kpi">
+        <div class="kpi-cell">
+          <div class="kpi-label">今週の支出合計</div>
+          <div class="kpi-value">¥62,005</div>
+          <div class="kpi-sub">今週（7日間）</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">直近8週平均</div>
+          <div class="kpi-value">¥99,491</div>
+          <div class="kpi-sub">過去8週の平均</div>
+        </div>
+      </div>
+      <div class="summary-diff">
+        <span class="diff-label">平均との差分</span>
+        <span>
+          <span class="diff-value under">
+            ↓&nbsp;¥37,486
+          </span>
+          <span class="diff-pct" style="color: #2563eb">（38%）</span>
+        </span>
+      </div>
+      
+      <div class="yearly-note">
+        このペースが続くと年間で¥1,949,272の差
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Card 2: カテゴリ別内訳 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">💳</div>
+        カテゴリ別内訳
+      </div>
+      <span class="card-meta">6 カテゴリ</span>
+    </div>
+    <div class="card-body">
+      
+        
+        
+        <div class="item-row">
+          <span class="item-emoji">🍽️</span>
+          <div class="item-info">
+            <div class="item-name">食費</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:100%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥29,052</span>
+            
+          </div>
+        </div>
+        
+        <div class="item-row">
+          <span class="item-emoji">💴</span>
+          <div class="item-info">
+            <div class="item-name">特別な支出</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:41%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥12,053</span>
+            
+          </div>
+        </div>
+        
+        <div class="item-row">
+          <span class="item-emoji">🏠</span>
+          <div class="item-info">
+            <div class="item-name">住宅</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:40%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥11,802</span>
+            <span class="tag tag-fixed">固定費</span>
+            
+          </div>
+        </div>
+        
+        <div class="item-row">
+          <span class="item-emoji">💴</span>
+          <div class="item-info">
+            <div class="item-name">教養・教育</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:17%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥5,060</span>
+            
+          </div>
+        </div>
+        
+        <div class="item-row">
+          <span class="item-emoji">📱</span>
+          <div class="item-info">
+            <div class="item-name">通信費</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:12%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥3,638</span>
+            <span class="tag tag-fixed">固定費</span>
+            
+          </div>
+        </div>
+        
+        <div class="item-row">
+          <span class="item-emoji">💴</span>
+          <div class="item-info">
+            <div class="item-name">現金・カード</div>
+            <div class="item-bar-wrap">
+              <div class="item-bar" style="width:1%;"></div>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-amount">¥400</span>
+            
+          </div>
+        </div>
+        
+      
+    </div>
+  </div>
+
+  <!-- Card 3: 支出トレンド -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">📈</div>
+        支出トレンド
+      </div>
+      <span class="card-meta">直近26週（約6ヶ月）</span>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap" id="chart-container"></div>
+      <div class="trend-footer">
+        <span class="trend-direction" id="trend-label"></span>
+        <div class="trend-legend">
+          <div class="legend-item"><span style="color:#f97316;font-weight:700">━</span> 6週MA</div>
+          <div class="legend-item"><span style="color:#cbd5e1">╌</span> 回帰</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: AI アドバイス -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">🤖</div>
+        AI アドバイス
+      </div>
+      <span class="card-meta">Gemini 分析</span>
+    </div>
+    <div class="card-body">
+      
+      <div class="ai-block ">
+        <div class="ai-icon">
+          💡
+        </div>
+        <div class="ai-content">
+          <div class="ai-label">INFO</div>
+          <div class="ai-text">Gemini API が利用できないため、自動コメントを生成できませんでした。<br>対象期間: 4/20（月）〜 4/26（日）<br>今週合計: ¥62,005<br>直近8週平均: ¥99,491</div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">自動生成 · 毎週水曜 22:00</div>
+
+<script>
+const TREND_DATA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11045, 111277, 88446, 65864, 177554, 92938, 141662, 41171, 172788, 78854, 33200, 57761, 62005];
+
+function movingAvg(data, w) {
+  return data.map((_, i) => {
+    const sl = data.slice(Math.max(0, i - w + 1), i + 1);
+    return sl.reduce((a, b) => a + b, 0) / sl.length;
+  });
+}
+function linReg(data) {
+  const n = data.length, xs = (n - 1) / 2;
+  let sxy = 0, sxx = 0;
+  data.forEach((v, i) => { const x = i - xs; sxy += x * v; sxx += x * x; });
+  return sxy / sxx;
+}
+function trendLabel(slope) {
+  if (slope >  1500) return { text: '↑ 増加傾向', color: '#d97706' };
+  if (slope < -1500) return { text: '↓ 減少傾向', color: '#059669' };
+  return                    { text: '→ 横ばい',   color: '#64748b' };
+}
+function fmt(v) {
+  return v >= 10000 ? `${(v/10000).toFixed(0)}万` : `${v.toLocaleString()}`;
+}
+
+function makeChart(data) {
+  const container = document.getElementById('chart-container');
+  const W = container.clientWidth || 340;
+  const LPAD = 42, H = 180, PAD = 16;
+  const CW = W - LPAD - 6;
+  const n = data.length;
+  const rawMax = Math.max(...data.filter(d => d > 0), 10000);
+  const TICK = rawMax <= 30000 ? 10000 : rawMax <= 80000 ? 20000 : 50000;
+  const numTicks = Math.ceil(rawMax / TICK);
+  const maxVal = numTicks * TICK;
+  const slotW = CW / n;
+  const barW = Math.max(4, slotW * 0.62);
+
+  let svg = '';
+
+  // grid lines
+  for (let t = 0; t <= numTicks; t++) {
+    const val = t * TICK;
+    const y = H - Math.round((val / maxVal) * (H - PAD));
+    svg += `<line x1="${LPAD}" y1="${y}" x2="${W-6}" y2="${y}" stroke="#edf0f4" stroke-width="1"/>`;
+    svg += `<text x="${LPAD-5}" y="${y+4}" font-size="10" fill="#9aabb8" text-anchor="end">${fmt(val)}</text>`;
+  }
+
+  // bars: all same base color, this week highlighted
+  svg += data.map((v, i) => {
+    const bh = v > 0 ? Math.max(3, Math.round((v / maxVal) * (H - PAD))) : 0;
+    const x = LPAD + i * slotW + (slotW - barW) / 2;
+    const y = H - bh;
+    const isThis = i === n - 1;
+    const fill   = isThis ? '#2563eb' : '#cbd5e1';
+    const rx     = isThis ? 4 : 3;
+    const opacity = isThis ? 1 : 0.8;
+    return `<rect x="${x.toFixed(1)}" y="${y}" width="${barW.toFixed(1)}" height="${bh}" rx="${rx}" fill="${fill}" opacity="${opacity}"/>`;
+  }).join('');
+
+  // 6-week moving average
+  const ma = movingAvg(data, 6);
+  const maPoints = ma.map((v, i) =>
+    `${(LPAD + i * slotW + slotW/2).toFixed(1)},${(H - (v/maxVal)*(H-PAD)).toFixed(1)}`
+  ).join(' ');
+  svg += `<polyline points="${maPoints}" fill="none" stroke="#f97316" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>`;
+
+  // regression line
+  const slope = linReg(data);
+  const intercept = data.reduce((a,b)=>a+b,0)/n - slope*(n-1)/2;
+  const ry0 = H - (intercept/maxVal)*(H-PAD);
+  const ry1 = H - ((intercept+slope*(n-1))/maxVal)*(H-PAD);
+  svg += `<line x1="${LPAD}" y1="${ry0.toFixed(1)}" x2="${W-6}" y2="${ry1.toFixed(1)}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.7"/>`;
+
+  // this week marker line
+  const tx = (LPAD + (n-1)*slotW + slotW/2).toFixed(1);
+  svg += `<line x1="${tx}" y1="0" x2="${tx}" y2="${H}" stroke="#2563eb" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>`;
+
+  // x-axis labels
+  svg += `<text x="${LPAD}" y="${H+14}" font-size="10" fill="#9aabb8">26週前</text>`;
+  svg += `<text x="${(LPAD+(W-6))/2}" y="${H+14}" font-size="10" fill="#9aabb8" text-anchor="middle">13週前</text>`;
+  svg += `<text x="${W-6}" y="${H+14}" font-size="10" fill="#2563eb" font-weight="bold" text-anchor="end">今週</text>`;
+
+  const ariaLabel = `支出トレンド: 直近26週の棒グラフ。最新週の支出は${fmt(data[data.length-1])}円。`;
+  container.innerHTML = `<svg role="img" aria-label="${ariaLabel}" width="${W}" height="${H+18}" viewBox="0 0 ${W} ${H+18}" style="display:block;overflow:visible"><title>${ariaLabel}</title>${svg}</svg>`;
+
+  const tl = trendLabel(slope);
+  const el = document.getElementById('trend-label');
+  el.textContent = tl.text;
+  el.style.color = tl.color;
+}
+
+makeChart(TREND_DATA);
+window.addEventListener('resize', () => makeChart(TREND_DATA));
+</script>
+</body>
+</html>
