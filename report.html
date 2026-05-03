@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+      background: #f0f4f8;
+      width: 400px;
+      padding: 12px;
+    }
+
+    .card {
+      width: 376px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      margin-bottom: 12px;
+    }
+    .card:last-child { margin-bottom: 0; }
+
+    /* ── ヘッダー共通 ── */
+    .hdr {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hdr-title  { font-size: 14px; font-weight: 700; color: #fff; }
+    .hdr-right  { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; }
+    .hdr-sub    { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+    .hdr-blue   { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+    .hdr-green  { background: linear-gradient(135deg, #064e3b, #059669); }
+    .hdr-purple { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+
+    /* ── カード1: サマリー ── */
+    .summary { padding: 16px 18px 12px; border-bottom: 1px solid #f1f5f9; }
+    .lbl { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .total-amt { font-size: 40px; font-weight: 800; line-height: 1; }
+    .period-sub { font-size: 11px; color: #cbd5e1; margin-top: 4px; }
+    .diff-row   { font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+    /* 明細 */
+    .items { padding: 10px 18px 14px; }
+    .items-lbl { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .item-row {
+      display: flex; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid #f8fafc;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-name { font-size: 13px; color: #1e293b; flex: 1; }
+    .item-amt  { font-size: 13px; color: #1e293b; font-weight: 600; padding-right: 8px; }
+    .tag { border-radius: 4px; padding: 1px 7px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .tag-bad  { background: #fee2e2; color: #b91c1c; }
+    .tag-good { background: #dcfce7; color: #15803d; }
+    .tag-ok   { background: #fef9c3; color: #854d0e; }
+    .tag-inv  { background: #dbeafe; color: #1e40af; }
+    .no-items { font-size: 12px; color: #94a3b8; padding: 6px 0; }
+
+    /* ── カード2: グラフ ── */
+    .chart-sec { padding: 14px 18px 12px; }
+    .legend {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+    }
+    .legend-left  { font-size: 13px; font-weight: 700; }
+    .legend-right { font-size: 10px; color: #94a3b8; }
+
+    /* ── カード3: AI ── */
+    .ai-sec { padding: 12px 18px 16px; }
+    .ai {
+      border-left: 3px solid; padding: 9px 11px; margin-top: 9px;
+      border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.7; color: #1e293b;
+    }
+    .ai:first-of-type { margin-top: 0; }
+    .ai-bad     { border-color: #dc2626; background: #fff5f5; }
+    .ai-good    { border-color: #2563eb; background: #eff6ff; }
+    .ai-neutral { border-color: #94a3b8; background: #f8fafc; }
+    .ai-hdr { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+    .ai-bad  .ai-hdr { color: #b91c1c; }
+    .ai-good .ai-hdr { color: #1d4ed8; }
+    .ai-neutral .ai-hdr { color: #475569; }
+  </style>
+</head>
+<body>
+
+  <!-- カード1: 週間サマリー + 明細 -->
+  <div class="card">
+    <div class="hdr hdr-blue">
+      <div class="hdr-title">💰 週間支出レポート</div>
+      <div class="hdr-right">4/20（月）〜 4/26（日）</div>
+    </div>
+    <div class="summary">
+      <div class="lbl">今週の支出合計</div>
+      <div class="total-amt" style="color: #2563eb">¥0</div>
+      <div class="period-sub">4/20（月）〜 4/26（日）</div>
+      <div class="diff-row" style="color: #2563eb">
+        ↓&nbsp;直近8週平均 ¥62,500 より ¥62,500（100%）
+      </div>
+    </div>
+    <div class="items">
+      <div class="items-lbl">カテゴリ別内訳</div>
+      
+        <div class="no-items">この期間の支出データはありません</div>
+      
+    </div>
+  </div>
+
+  <!-- カード2: トレンドグラフ -->
+  <div class="card">
+    <div class="hdr hdr-green">
+      <div class="hdr-title">📈 支出トレンド（直近13週）</div>
+      <div class="hdr-right" id="trend-hdr"></div>
+    </div>
+    <div class="chart-sec">
+      <div id="chart-container"></div>
+      <div class="legend">
+        <span class="legend-left" id="trend-label"></span>
+        <span class="legend-right">
+          <span style="color:#f97316">──</span> 4週MA &nbsp;
+          <span style="color:#94a3b8">- -</span> 回帰
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- カード3: AI コメント -->
+  <div class="card">
+    <div class="hdr hdr-purple">
+      <div>
+        <div class="hdr-title">🤖 AI アドバイス</div>
+        <div class="hdr-sub">支出パターンの分析と改善提案</div>
+      </div>
+    </div>
+    <div class="ai-sec">
+      <div class="lbl" style="margin-bottom:10px">AI コメント</div>
+      
+      <div class="ai ai-neutral">
+        <div class="ai-hdr">
+          💡 INFO
+        </div>
+        Gemini API が利用できないため、自動コメントを生成できませんでした。<br>対象期間: 4/20（月）〜 4/26（日）<br>今週合計: ¥0<br>直近8週平均: ¥62,500
+      </div>
+      
+    </div>
+  </div>
+
+<script>
+const TREND_DATA = [0, 0, 0, 0, 0, 0, 0, 0, 500000, 0, 0, 0, 0];
+
+function movingAvg(data, w) {
+  return data.map((_, i) => {
+    const sl = data.slice(Math.max(0, i - w + 1), i + 1);
+    return sl.reduce((a, b) => a + b, 0) / sl.length;
+  });
+}
+function linReg(data) {
+  const n = data.length, xs = (n - 1) / 2;
+  let sxy = 0, sxx = 0;
+  data.forEach((v, i) => { const x = i - xs; sxy += x * v; sxx += x * x; });
+  return sxy / sxx;
+}
+function trendLabel(slope) {
+  if (slope >  1500) return { text: '↑ 増加傾向', color: '#dc2626' };
+  if (slope < -1500) return { text: '↓ 減少傾向', color: '#16a34a' };
+  return                    { text: '→ 横ばい',   color: '#6b7280' };
+}
+
+function makeChartSVG(data) {
+  const LPAD = 36, W = 340, H = 140, PAD = 14;
+  const CW = W - LPAD, n = data.length;
+  const rawMax = Math.max(...data.filter(d => d > 0), 10000);
+  const TICK = 10000;
+  const numTicks = Math.ceil(rawMax / TICK);
+  const maxVal = numTicks * TICK;
+  const slotW = CW / n;
+  const barW = Math.max(3, slotW * 0.72);
+
+  let svg = `<line x1="${LPAD}" y1="0" x2="${LPAD}" y2="${H}" stroke="#e2e8f0" stroke-width="0.8"/>`;
+  for (let t = 0; t <= numTicks; t++) {
+    const val = t * TICK;
+    const y = H - Math.round((val / maxVal) * (H - PAD));
+    const lbl = t === 0 ? '0' : `${(val/10000).toFixed(0)}万`;
+    svg += `<line x1="${LPAD}" y1="${y}" x2="${W}" y2="${y}" stroke="#f1f5f9" stroke-width="0.8"/>`;
+    svg += `<text x="${LPAD-4}" y="${y+3}" font-size="9" fill="#94a3b8" text-anchor="end">${lbl}</text>`;
+  }
+
+  svg += data.map((v, i) => {
+    const bh = v > 0 ? Math.max(2, Math.round((v / maxVal) * (H - PAD))) : 0;
+    const x = LPAD + i * slotW, y = H - bh;
+    const isThis = i === n - 1;
+    const color = isThis
+      ? (v < maxVal * 0.3 ? '#4ade80' : v > maxVal * 0.7 ? '#f87171' : '#34d399')
+      : (v < maxVal * 0.3 ? '#d1fae5' : v > maxVal * 0.7 ? '#fecaca' : '#e0f2fe');
+    return `<rect x="${x.toFixed(1)}" y="${y}" width="${barW.toFixed(1)}" height="${bh}" rx="1" fill="${color}"/>`;
+  }).join('');
+
+  const ma = movingAvg(data, 4);
+  const maPoints = ma.map((v, i) =>
+    `${(LPAD + i * slotW + slotW/2).toFixed(1)},${(H - (v/maxVal)*(H-PAD)).toFixed(1)}`
+  ).join(' ');
+
+  const slope = linReg(data);
+  const intercept = data.reduce((a,b)=>a+b,0)/n - slope*(n-1)/2;
+  const ry0 = H - (intercept/maxVal)*(H-PAD);
+  const ry1 = H - ((intercept+slope*(n-1))/maxVal)*(H-PAD);
+  const tx = (LPAD + (n-1)*slotW + slotW/2).toFixed(1);
+
+  svg += `<line x1="${LPAD}" y1="${ry0.toFixed(1)}" x2="${W}" y2="${ry1.toFixed(1)}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" opacity="0.8"/>`;
+  svg += `<polyline points="${maPoints}" fill="none" stroke="#f97316" stroke-width="1.5" opacity="0.85" stroke-linejoin="round"/>`;
+  svg += `<line x1="${tx}" y1="0" x2="${tx}" y2="${H}" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2,2" opacity="0.7"/>`;
+  svg += `<text x="${LPAD}" y="${H+12}" font-size="9" fill="#94a3b8">13週前</text>`;
+  svg += `<text x="${(LPAD+W)/2}" y="${H+12}" font-size="9" fill="#94a3b8" text-anchor="middle">7週前</text>`;
+  svg += `<text x="${W}" y="${H+12}" font-size="9" fill="#3b82f6" font-weight="bold" text-anchor="end">今週</text>`;
+
+  return `<svg width="${W}" height="${H+16}" viewBox="0 0 ${W} ${H+16}" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">${svg}</svg>`;
+}
+
+document.getElementById('chart-container').innerHTML = makeChartSVG(TREND_DATA);
+const tl = trendLabel(linReg(TREND_DATA));
+document.getElementById('trend-label').textContent = tl.text;
+document.getElementById('trend-label').style.color = tl.color;
+document.getElementById('trend-hdr').textContent = tl.text;
+</script>
+</body>
+</html>
